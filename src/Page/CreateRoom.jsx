@@ -17,7 +17,7 @@ export default function CreateRoom() {
         query: { token: token },
       });
       socket.on("room:created", (roomId) => {
-        console.log(`Room created: ${roomId}`);
+        // console.log(`Room created: ${roomId}`);
         // You can add additional logic here, like updating the UI
       });
     }

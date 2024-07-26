@@ -8,7 +8,7 @@ import Navbar from "./components/navbar/NavBar";
 import RoomLists from "./components/rooms/RoomLists";
 import Video from "./components/videos/Video";
 import { SocketProvider, useSocket } from "./socket/SocketProvider";
-import { useSelector } from "react-redux";
+import LiveRoom from "./components/rooms/liveRoom/LiveRoom";
 
 function SocketHandler() {
   // is component ke andar useSocket use karna tha isliye , inside app .js , first humne socket context provide karba diya uske bad ,
@@ -48,8 +48,8 @@ function SocketHandler() {
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />}>
-          <Route path="room/:id" element={<RoomLists />} />
           <Route path="rooms" element={<RoomLists />} />
+          <Route path="room/:id" element={<LiveRoom />} />
           <Route path="videos" element={<Video />} />
         </Route>
         <Route path="signup" element={<Signup />} />

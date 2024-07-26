@@ -18,12 +18,12 @@ const authUserSlice = createSlice({
   initialState,
   reducers: {
     setToken: (state, action) => {
-      console.log(action);
+      // console.log(action);
       state.token = action.payload;
     },
 
     setIsTokenLoading: (state, action) => {
-      console.log(action);
+      // console.log(action);
       state.isLoading = action.payload;
     },
   },

@@ -23,18 +23,18 @@ export const SocketProvider = ({ token, children }) => {
       });
 
       socketRef.current.on("connect", () => {
-        console.log("Socket connected:", socketRef.current.id);
+        // console.log("Socket connected:", socketRef.current.id);
         setSocketError(false);
       });
 
       socketRef.current.on("connect_error", (err) => {
-        console.error("Socket connection error:", err);
+        // console.error("Socket connection error:", err);
         setSocketError(true);
       });
 
       return () => {
         socketRef.current.disconnect();
-        console.log("Socket disconnected");
+        // console.log("Socket disconnected");
       };
     }
   }, [token]);

@@ -13,10 +13,12 @@ export default function RoomLists() {
   const dispatch = useDispatch();
 
   // create room
-  console.log("ROOMLIST COMPONENT IS BEING RENDERED");
+  // console.log("ROOMLIST COMPONENT IS BEING RENDERED");
   // get all rooms   // ------------------ //
   const token = useSelector((state) => state?.authUser?.token);
   const rooms = useSelector((state) => state?.appData?.rooms);
+
+  // console.log(rooms);
   const {
     isLoading: isLoadingAllRooms,
     error: isErrorAllRooms,
@@ -26,7 +28,7 @@ export default function RoomLists() {
   } = useHttp();
 
   useEffect(() => {
-    console.log("callinjg api to get all rooms");
+    // console.log("callinjg api to get all rooms");
     sendRequestAllRooms({
       url: `${roomEndPoints.GET_ALL_ROOM_URL}`,
       method: "GET",
@@ -38,7 +40,7 @@ export default function RoomLists() {
 
   useEffect(() => {
     if (dataAllRooms?.rooms) {
-      console.log("Rooms", dataAllRooms?.rooms);
+      // console.log("Rooms", dataAllRooms?.rooms);
       //   dispatch(setRooms(dataAllRooms?.rooms));
       dispatch(setRooms(dataAllRooms.rooms)); // for testing purposes
     }
@@ -65,7 +67,7 @@ export default function RoomLists() {
     let sr = [];
 
     rooms.forEach((room) => {
-      console.log("room ", room);
+      // console.log("room ", room);
       if (room.isCreatedByUser) {
         cu.push(room);
       }
@@ -137,7 +139,7 @@ export default function RoomLists() {
         >
           <CreateNewRoom />
           {createdByUser.map((room) => (
-            <RoomCard key={room._id} room={room} />
+            <RoomCard key={room._id} _id={room._id} />
           ))}
         </div>
       </div>
@@ -155,7 +157,7 @@ export default function RoomLists() {
           className=" flex flex-row "
         >
           {joinedByUser.map((room) => (
-            <RoomCard key={room._id} room={room} />
+            <RoomCard key={room._id} _id={room._id} />
           ))}
         </div>
       </div>
@@ -173,7 +175,7 @@ export default function RoomLists() {
           }}
         >
           {sortedRooms.map((room) => (
-            <RoomCard key={room._id} room={room} />
+            <RoomCard key={room._id} _id={room._id} />
           ))}
         </div>
       </div>

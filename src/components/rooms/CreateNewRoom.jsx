@@ -40,7 +40,7 @@ export default function CreateNewRoom({ trigger }) {
       isPrivate,
       permissions,
     };
-    console.log(requestData);
+    // console.log(requestData);
     // send request
     await sendRequest({
       url: `${roomEndPoints.CREATE_ROOM_URL}`,
@@ -53,7 +53,7 @@ export default function CreateNewRoom({ trigger }) {
 
     // handle success
     if (!error) {
-      console.log("Room created successfully");
+      // console.log("Room created successfully");
       setRoomName("");
       setDescription("");
       setIsPrivate(false);
@@ -67,9 +67,9 @@ export default function CreateNewRoom({ trigger }) {
     }
   };
   // just for testing purposes
-  useEffect(() => {
-    console.log("creating Room loading ", isLoading, "data", data);
-  }, [isLoading]);
+  // useEffect(() => {
+  //   // console.log("creating Room loading ", isLoading, "data", data);
+  // }, [isLoading]);
 
   // socket events are here
 

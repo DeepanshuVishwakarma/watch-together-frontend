@@ -15,7 +15,7 @@ export function login(email, password, navigate) {
   return async (dispatch) => {
     dispatch(setIsUserLoading(true));
     try {
-      console.log("login: loading...");
+      // console.log("login: loading...");
       if (!LOGIN_API) {
         throw new Error("Login API/url is not available");
       }
@@ -27,13 +27,13 @@ export function login(email, password, navigate) {
         },
       });
 
-      console.log("LOGIN API RESPONSE............", response);
+      // console.log("LOGIN API RESPONSE............", response);
 
       if (!response.data.success) {
         throw new Error(response.data.message);
       }
-      console.log("data ", response.data);
-      console.log("login, SUCCESSFUL");
+      // console.log("data ", response.data);
+      // console.log("login, SUCCESSFUL");
 
       dispatch(setToken(response.data.token));
       dispatch(setUser(response.data.user));
@@ -42,7 +42,7 @@ export function login(email, password, navigate) {
       navigate("/");
     } catch (error) {
       dispatch(setError(true));
-      console.error("LOGIN API ERROR............", error);
+      // console.error("LOGIN API ERROR............", error);
     }
     dispatch(setIsUserLoading(false));
   };
@@ -53,7 +53,7 @@ export function tokenBasedLogin(token) {
     dispatch(setIsUserLoading(true));
     try {
       const TOKEN_LOGIN_API = "/auth/is-auth";
-      console.log("token based login : loading...");
+      // console.log("token based login : loading...");
 
       const response = await axios(TOKEN_LOGIN_API, {
         method: "POST",
@@ -62,13 +62,13 @@ export function tokenBasedLogin(token) {
         },
       });
 
-      console.log("token based login successful............", response);
+      // console.log("token based login successful............", response);
 
       if (!response.data.success) {
         throw new Error(response.data.message);
       }
 
-      console.log(" login , SUCCESSFUL");
+      // console.log(" login , SUCCESSFUL");
 
       // const userImage = response.data?.user?.image
       //   ? response.data.user.image
@@ -77,8 +77,8 @@ export function tokenBasedLogin(token) {
 
       navigate("/");
     } catch (error) {
-      console.log("TOKEN LOGIN API ERROR............", error);
-      console.error("Token Login Failed");
+      console.error("TOKEN LOGIN API ERROR............", error);
+      // console.error("Token Login Failed");
     }
     dispatch(setIsUserLoading(false));
   };

@@ -25,13 +25,13 @@ export default function RoomRequests({ _id: roomId }) {
         };
         dispatch(setOneRooms(tempRoom));
       }
-      console.log(response.message);
+      // console.log(response.message);
     });
   };
   const handleDeleteRequest = () => {
     alert("delteing user request");
   };
-  console.log("room", room, "rquest", room.requests);
+  // console.log("room", room, "rquest", room.requests);
   return (
     <div
       style={{ padding: "5px", border: "1px solid #ddd", borderRadius: "5px" }}

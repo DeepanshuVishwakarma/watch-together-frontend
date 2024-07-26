@@ -13,19 +13,19 @@ const userSlice = createSlice({
   initialState,
   reducers: {
     setUser: (state, action) => {
-      console.log(action);
+      // console.log(action);
       state.user = action.payload;
     },
     setIsUserLoading: (state, action) => {
-      console.log(action);
+      // console.log(action);
       state.isLoading = action.payload;
     },
     setError: (state, action) => {
-      console.log("setError", action);
+      // console.log("setError", action);
       state.error = action.payload;
     },
     setIsSignedIn: (state, action) => {
-      console.log("payload for login error", action.payload);
+      // console.log("payload for login error", action.payload);
       state.isSignedIn = action.payload;
     },
   },

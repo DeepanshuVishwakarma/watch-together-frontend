@@ -24,9 +24,9 @@ const Login = () => {
   const { token } = useSelector((state) => state.authUser);
 
   // just for making sure that user has been logged in
-  useEffect(() => {
-    console.log(token, user, isUserLoading, error, isUserSignedIn);
-  }, [isUserSignedIn]);
+  // useEffect(() => {
+  //   console.log(token, user, isUserLoading, error, isUserSignedIn);
+  // }, [isUserSignedIn]);
 
   const handleChange = (e) => {
     setFormData({

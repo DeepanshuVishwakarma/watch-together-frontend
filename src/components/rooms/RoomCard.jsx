@@ -22,12 +22,14 @@ import { useSocketEmit } from "../../hooks/useSocketEmit";
 import UpdateRoom from "./UpdateRoom";
 import RoomRequests from "./RoomRequests";
 
-const RoomCard = ({ room }) => {
+const RoomCard = ({ _id: roomId }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const token = useSelector((state) => state.authUser.token);
   // const { rooms } = useSelector((state) => state?.appData) || [];
   // const room = rooms.find((room) => room?._id === roomId);
+  const { rooms } = useSelector((state) => state?.appData) || [];
+  const room = rooms.find((room) => room?._id === roomId);
   const {
     _id,
     roomName,
@@ -60,8 +62,7 @@ const RoomCard = ({ room }) => {
   };
   useEffect(() => {
     if (deleteData?.success) {
-      console.log("Rooms", deleteData?.data);
-
+      // console.log("Rooms", deleteData?.data);
       //   dispatch(setRooms(deleteData?.rooms));
       // dispatch(setRooms(deleteData.rooms)); // for testing purposes
     }
@@ -83,10 +84,13 @@ const RoomCard = ({ room }) => {
 
   const handleGoLive = () => {
     emitGoLive("room:goLive", _id, (response) => {
+      console.log("result: " + goLiveResponse);
       if (response.success) {
         dispatch(setLiveRoom(response?.data));
+        const roomId = _id;
+        navigate(`/room/${roomId}`);
       }
-      console.log(response?.message);
+      // console.log(response?.message);
     });
   };
 
@@ -102,7 +106,7 @@ const RoomCard = ({ room }) => {
       if (response?.success) {
         dispatch(setLiveRoom(response?.data));
       }
-      console.log(response?.message);
+      // console.log(response?.message);
     });
   };
 
@@ -115,13 +119,21 @@ const RoomCard = ({ room }) => {
 
   const handleJoinLive = () => {
     emitJoinLive("room:join", _id, (response) => {
+      console.log("Response from join live:", response);
       if (response?.success) {
-        dispatch(setLiveRoom(response?.data));
-        navigate(`room/${_id}`);
+        console.log("Success response from join live:", response);
+        dispatch(setLiveRoom(response.data));
+        const roomId = _id;
+        navigate(`/room/${roomId}`);
+      } else {
+        console.error("Failed to join live:", response?.message);
       }
-      console.log(response?.message);
     });
   };
+
+  // useEffect(() => {
+  //   console.log("Room insside car d", room);
+  // }, [room]);
 
   const {
     emit: emitSendJoinReq,
@@ -137,10 +149,11 @@ const RoomCard = ({ room }) => {
           ...room,
         };
         if (response.state === "requested") {
-          tempRoom[users] = response.data;
+          tempRoom.isRequested = true;
         } else if (response.state === "joined") {
-          tempRoom[isRequested] = false;
+          tempRoom.isRequested = false;
         }
+        tempRoom.users = response.data;
         dispatch(setOneRooms(tempRoom));
       }
     });

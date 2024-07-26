@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   liveRoom: {}, // exectes the roomId which was returned from the server
-  videos: [],
+  videos: {},
   rooms: [],
 };
 
@@ -14,17 +14,21 @@ const appDataSlice = createSlice({
       // console.log(action);
       state.videos = action.payload;
     },
+
     setOneRooms: (state, action) => {
       const tempRoom = action.payload;
-      const tempRooms = state.rooms.filter((room) => room._id === tempRoom._id);
-      tempRooms.push(tempRoom);
+      const tempRooms = state.rooms.map((room) =>
+        room._id === tempRoom._id ? tempRoom : room
+      );
       state.rooms = tempRooms;
     },
+
     setRooms: (state, action) => {
-      // console.log(action);
       state.rooms = action.payload;
     },
     setLiveRoom: (state, action) => {
+      console.log(action.payload);
+
       state.liveRoom = action.payload;
     },
   },

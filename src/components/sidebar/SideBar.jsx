@@ -17,13 +17,13 @@ const SideBarButton = styled(Button)`
 SideBarButton.displayName = "SideBarButton";
 
 export default function SideBar() {
-  function handleVideos() {
-    console.log("Handling videos");
-  }
+  // function handleVideos() {
+  //   // console.log("Handling videos");
+  // }
 
-  function handleRooms() {
-    console.log("Handling rooms");
-  }
+  // function handleRooms() {
+  //   // console.log("Handling rooms");
+  // }
 
   return (
     <div>

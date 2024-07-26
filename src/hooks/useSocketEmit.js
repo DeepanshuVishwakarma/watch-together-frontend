@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { useSocket } from "../socket/SocketProvider";
 
 export const useSocketEmit = () => {
-  console.log("useSocketEmit called");
+  // console.log("useSocketEmit called");
   const { socket, error: socketError } = useSocket();
   const [isLoading, setIsLoading] = useState(false);
   const [response, setResponse] = useState(null);
@@ -11,7 +11,7 @@ export const useSocketEmit = () => {
   const emit = useCallback(
     (event, data, callback) => {
       if (socket && !socketError) {
-        console.log("emitting event");
+        // console.log("emitting event");
         setIsLoading(true);
         setError(null);
         setResponse(null);
@@ -20,7 +20,7 @@ export const useSocketEmit = () => {
           setIsLoading(false);
           setResponse(responseData);
           if (callback) {
-            console.log("ack received", responseData);
+            // console.log("ack received", responseData);
             callback(responseData);
           }
         });

@@ -15,7 +15,7 @@ export default function useHttp() {
   }) => {
     setIsLoading(true);
     try {
-      console.log("body inside useHttp", body);
+      // console.log("body inside useHttp", body);
 
       const response = await axios({
         url,
@@ -31,7 +31,7 @@ export default function useHttp() {
       }
     } catch (err) {
       // console.error(err?.response?.data);
-      console.log(err);
+      // console.log(err);
       setError(
         err?.response?.data?.message || err?.message || "Something went wrong"
       );
