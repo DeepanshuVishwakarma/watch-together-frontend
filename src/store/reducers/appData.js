@@ -4,6 +4,7 @@ const initialState = {
   liveRoom: {}, // exectes the roomId which was returned from the server
   videos: {},
   rooms: [],
+  sync: false,
 };
 
 const appDataSlice = createSlice({
@@ -31,9 +32,12 @@ const appDataSlice = createSlice({
 
       state.liveRoom = action.payload;
     },
+    setSync: (state, action) => {
+      state.sync = action.payload;
+    },
   },
 });
 
-export const { setVideos, setRooms, setLiveRoom, setOneRooms } =
+export const { setVideos, setRooms, setLiveRoom, setOneRooms, setSync } =
   appDataSlice.actions;
 export default appDataSlice.reducer;

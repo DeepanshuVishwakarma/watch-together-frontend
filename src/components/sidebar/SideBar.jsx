@@ -2,6 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import Button from "../UI/Button";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 const SideBarButton = styled(Button)`
   &.sidebarbutton {
     // some style
@@ -24,7 +25,9 @@ export default function SideBar() {
   // function handleRooms() {
   //   // console.log("Handling rooms");
   // }
-
+  const liveRoom = useSelector((state) => state.appData.liveRoom); // Fixed the return issue
+  const roomId = liveRoom?._id;
+  console.log("Live OROm ID :   ", roomId);
   return (
     <div>
       <Link to="videos">
@@ -33,6 +36,11 @@ export default function SideBar() {
       <Link to="rooms">
         <SideBarButton className="sidebarbutton">Rooms</SideBarButton>
       </Link>
+      {liveRoom && roomId && (
+        <Link to={`/room/${roomId}`}>
+          <SideBarButton className="sidebarbutton">LiveRoom</SideBarButton>
+        </Link>
+      )}
     </div>
   );
 }

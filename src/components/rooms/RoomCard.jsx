@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import {
   DeleteRoomButton,
   GoLiveButton,
@@ -10,10 +10,9 @@ import {
 } from "./RoomButtons";
 import Button from "../UI/Button";
 import useHttp from "../../hooks/useHttp";
-import { roomEndPoints, SOCKET_URL } from "../../service/apis";
+import { roomEndPoints } from "../../service/apis";
 import { useDispatch, useSelector } from "react-redux";
-import io from "socket.io-client";
-import { useSocket } from "../../socket/SocketProvider";
+// import { useSocket } from "../../socket/SocketProvider";
 import RoomUsersPopover from "./room-users/RoomUsersPopover";
 import RoomUsers from "./room-users/RoomUsers";
 import { useNavigate } from "react-router-dom";

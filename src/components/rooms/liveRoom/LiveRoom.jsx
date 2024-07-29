@@ -5,6 +5,9 @@ import { useParams } from "react-router-dom";
 import { setLiveRoom } from "../../../store/reducers/appData";
 import { useSocketEmit } from "../../../hooks/useSocketEmit";
 import { useSocket } from "../../../socket/SocketProvider";
+import VideoPlayer from "../../videos/VideoPlayer";
+import VideoList from "../../videos/VideoList";
+import ReactPlayer from "react-player";
 
 export default function LiveRoom() {
   const dispatch = useDispatch();
@@ -14,10 +17,12 @@ export default function LiveRoom() {
   const { socket, socketError } = useSocket();
 
   const rooms = useSelector((state) => state.appData.rooms) || [];
+  const videos = useSelector((state) => state.appData.videos) || [];
+  const video = videos[0];
   const room = rooms.find((room) => room?._id === roomId);
 
   const liveRoom = useSelector((state) => state.appData.liveRoom); // Fixed the return issue
-
+  console.log("LiveRoom", liveRoom);
   const [msg, setMsg] = useState("");
 
   const {
@@ -75,7 +80,7 @@ export default function LiveRoom() {
 
   return (
     <div>
-      <div>
+      <div className="chat-component">
         <div>Chat Component</div>
         <div>
           {liveRoom?.messages &&
@@ -99,6 +104,12 @@ export default function LiveRoom() {
           {isMessageSendLoading ? "Sending..." : "Submit"}
         </button>
       </div>
+      {/* <div className="videoPlayer compoent">
+            <VideoPlayer></VideoPlayer>
+      </div> */}
+
+      {video?.videoURL && <VideoPlayer video={video} />}
+      <VideoList></VideoList>
     </div>
   );
 }
