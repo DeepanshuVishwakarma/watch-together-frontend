@@ -3,6 +3,9 @@ import styled from "styled-components";
 import Button from "../UI/Button";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
+import Friends from "../friends/Friends";
+import SearchUser from "../user/SearchUser";
+import FriendRequest from "../friends/FriendRequest";
 const SideBarButton = styled(Button)`
   &.sidebarbutton {
     // some style
@@ -30,6 +33,9 @@ export default function SideBar() {
   console.log("Live OROm ID :   ", roomId);
   return (
     <div>
+      <Friends />
+      <FriendRequest />
+      <SearchUser />
       <Link to="videos">
         <SideBarButton className="sidebarbutton">Videos</SideBarButton>
       </Link>

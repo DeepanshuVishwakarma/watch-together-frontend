@@ -1,109 +1,107 @@
 import React, { useState, useRef, useEffect } from "react";
 import ReactPlayer from "react-player";
 import { useLocation } from "react-router-dom";
-import { IconButton, Slider, Box } from "@mui/material";
+import { IconButton, Slider, Box, Button } from "@mui/material";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import SpeedIcon from "@mui/icons-material/Speed";
+import { useDispatch, useSelector } from "react-redux";
 import { useSocketEmit } from "../../hooks/useSocketEmit";
 import { useSocket } from "../../socket/SocketProvider";
-import { useDispatch } from "react-redux";
-import { setSync } from "../../store/reducers/appData";
+import {
+  setRoomVideoPlayerData,
+  setSync,
+  setVideoPlayerData,
+} from "../../store/reducers/appData";
 
-function VideoPlayer({ video }) {
+const VideoPlayer = () => {
+  // console.log("videoPlayer called");
+
+  const dispatch = useDispatch();
+  const location = useLocation();
+  const playerRef = useRef(null);
+  const videoRef = useRef(null);
+  const { socket } = useSocket();
+  const { emit: emitVideoEvent } = useSocketEmit();
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(0.8);
   const [playbackRate, setPlaybackRate] = useState(1.0);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const playerRef = useRef(null);
-  const { emit: emitVideoEvent } = useSocketEmit();
-  const location = useLocation();
-  const sync = useSelector((state) => state.appData.sync) || [];
-  const { socket, socketError } = useSocket();
-  const dispatch = useDispatch();
+  const [isVideoChanged, setIsVideoChanged] = useState(false);
 
-  // perfect - sync   funtionality
-  // call perfect sync even if sync button is  clicked ,
-  const {
-    emit: emitSync,
-    isLoading: isSyncLoading,
-    response: syncResponse,
-    error: syncError,
-  } = useSocketEmit();
+  const videoPlayerData = useSelector((state) => state.appData.videoPlayerData);
+  const roomVideoPlayerData = useSelector(
+    (state) => state.appData.roomVideoPlayerData
+  );
+  const sync = useSelector((state) => state.appData.sync);
+  const liveRoom = useSelector((state) => state.appData.liveRoom);
+  const rooms = useSelector((state) => state.appData.rooms);
+  const user = useSelector((state) => state.User.user);
+
+  const video = location.pathname.includes("room")
+    ? roomVideoPlayerData
+    : videoPlayerData;
 
   useEffect(() => {
-    if (sync && location.pathname.includes("room")) {
-      const syncVideoDetails = (details) => {
-        setIsPlaying(details.isPlaying);
-        playerRef.current.seekTo(details.seekTime);
-        // setVolume(details.volume);
-        // setPlaybackRate(details.playbackRate);
-      };
-      emitSync("video:perfect-sync", userId, (response) => {
-        syncVideoDetails(response.data);
-      });
-    }
-  }, [sync]);
+    videoRef.current = video;
+  }, [video]);
 
-  // play pause code
-  const {
-    emit: emitPlayPause,
-    isLoading: isPlayPause,
-    response: playPauseResponse,
-    error: playPauseError,
-  } = useSocketEmit();
+  const roomId = liveRoom && liveRoom?._id;
+
+  const isRoomPage = () => location.pathname.includes("room");
+  const isCreator = () =>
+    rooms.find((room) => room._id === roomId)?.createdBy === user._id;
+  const isAdmin = () =>
+    rooms.find((room) => room._id === roomId)?.admins.includes(user._id);
 
   const handlePlayPause = () => {
-    setIsPlaying(!isPlaying);
-    dispatch(setSync(false));
-  };
-
-  const hasPermission = (value) => {
-    // expects a string value
-    const perMissionFor = String(value);
-
-    // call this function only when you are in live room
-    const liveRoom = useSelector((state) => state.appData.liveRoom);
-    const roomId = liveRoom?._id;
-
-    // if roomId not found using liveRoom , then you are not in live room and u can't use this function
-    if (roomId) {
-      const rooms = useSelector((state) => state.appData.rooms) || [];
-      const room = rooms.find((room) => room?._id === roomId);
-      const permissionGrantedTo = room?.permissions?.perMissionFor;
-
-      if (!permissionGrantedTo) {
-        // if permissionGrantedTo == false , then only admins hasthepermission is granted
-
-        // check if user is an admin or not
-        const { user } = useSelector((state) => state.User);
-        const userId = user._id;
-        const isAdmin = room.admins.includes(userId);
-        return isAdmin ? true : false;
+    const togglePlayPause = (shouldEmit = false) => {
+      console.log("togglePlayPause");
+      setIsPlaying(!isPlaying);
+      if (shouldEmit) {
+        console.log("emitting playPause");
+        emitVideoEvent(
+          "video:playPause",
+          { isPlaying: !isPlaying, roomId },
+          (response) => {
+            if (!response.success) {
+              console.error(response);
+            }
+          }
+        );
       }
+    };
 
-      // if permissionGrantedTo == true , then all users has the permission
-      return true;
+    const canControlPlayback = () => isCreator() || hasPermission("player");
+
+    if (isRoomPage()) {
+      if (isCreator()) {
+        togglePlayPause(true);
+        console.log("creator");
+      } else if (canControlPlayback()) {
+        if (sync) {
+          console.log("here");
+          togglePlayPause(true);
+        } else {
+          console.log("here");
+          togglePlayPause();
+        }
+      } else if (!hasPermission("player") && !sync) {
+        togglePlayPause();
+      }
     }
+    // else {
+    //   togglePlayPause();
+    // }
   };
 
-  useEffect(() => {
-    const perMissionFor = "player";
-    if (location.pathname.includes("room") && hasPermission(perMissionFor)) {
-      emitPlayPause("video:playPause", isPlaying);
-    }
-  }, [isPlaying]);
-
-  const handleVolumeChange = (event, newValue) => {
+  const handleVolumeChange = (event, newValue) =>
     setVolume(Number(newValue) * 0.01);
-  };
-
-  const handlePlaybackRateChange = (event, newValue) => {
+  const handlePlaybackRateChange = (event, newValue) =>
     setPlaybackRate(Number(newValue) * 0.01);
-  };
-
   const toggleFullscreen = () => {
     if (!isFullscreen) {
       playerRef.current.wrapper.requestFullscreen();
@@ -113,47 +111,162 @@ function VideoPlayer({ video }) {
     setIsFullscreen(!isFullscreen);
   };
 
+  const handleCancelVideoPlayer = () => {
+    isRoomPage()
+      ? dispatch(setRoomVideoPlayerData(null))
+      : dispatch(setVideoPlayerData(null));
+  };
+
+  const hasPermission = (permission) => {
+    if (!roomId) return false;
+    const room = rooms.find((room) => room._id === roomId);
+    if (!room) return false;
+    if (room.permissions[permission]) return true;
+    if (user) {
+      const admins = (room && room?.admins) || [];
+      return admins?.includes(user?._id);
+    }
+  };
+
+  const handleSync = () => {
+    if (!sync) {
+      emitVideoEvent("video:perfect-sync", roomId, (response) => {
+        if (response.success) {
+          setIsPlaying(response.data.isPlaying);
+          playerRef.current.seekTo(response.data.seekTime);
+        }
+      });
+    }
+    dispatch(setSync(!sync));
+    console.log("handle sync", sync);
+  };
+
   useEffect(() => {
-    // this effect will run only on creator's ui
-    socket.on("video:get-sync-details", async (data, callback) => {
-      try {
-        const syncVideoDetails = {
-          isPlaying,
-          seekTime: playbackRate.current.seekTime,
-          playbackRate,
+    if (
+      isCreator() &&
+      roomVideoPlayerData &&
+      roomVideoPlayerData?._id &&
+      roomId &&
+      !isVideoChanged
+    ) {
+      console.log("emitting event for change video");
+      const videoId = roomVideoPlayerData._id;
+      setIsVideoChanged(true);
+      emitVideoEvent(
+        "video:change",
+        {
+          roomId,
+          videoId,
+        },
+        (response) => {
+          if (response.error) {
+            console.error(response);
+          } else {
+            setIsVideoChanged(false); // Reset the state after a successful emit
+          }
+        }
+      );
+    }
+  }, [roomVideoPlayerData]);
+
+  useEffect(() => {
+    if (isRoomPage()) {
+      socket.on("video:changed", (roomData) => {
+        console.log("video:changed event received", roomData);
+        const currentVideoId = roomData.currentVideo._id.toString();
+        const playerVideoId = videoRef.current?._id.toString(); // Use ref to get the current video
+        console.log(currentVideoId, videoRef.current);
+        if (currentVideoId === playerVideoId) {
+          console.log("The IDs are equal.");
+        } else {
+          console.log("The IDs are not equal.");
+          dispatch(setRoomVideoPlayerData(roomData.currentVideo));
+        }
+      });
+
+      socket.on("video:get-sync-details", (data, callback) => {
+        console.log("video:get-sync-details event received", data);
+        try {
+          const syncVideoDetails = {
+            isPlaying: playerRef.current.getInternalPlayer().paused === false, // Assuming getInternalPlayer returns the underlying video element
+            seekTime: playerRef.current.getCurrentTime(),
+            playbackRate: playerRef.current.getInternalPlayer().playbackRate,
+          };
+          console.log("Sync video details:", syncVideoDetails);
+          callback({ success: true, data: syncVideoDetails });
+        } catch (error) {
+          console.error("Error getting sync details:", error);
+          callback({ success: false, message: "Error getting sync details" });
+        }
+      });
+
+      socket.on("video:playPause", (data) => {
+        // listen to this only  if you sync option is on
+        console.log("video:playPause event received", data, sync, isCreator());
+        const togglePlayPause = () => {
+          if (data.userId.toString() === user._id) {
+            return;
+          } else {
+            setIsPlaying(data.isPlaying);
+          }
         };
+        if (isCreator()) {
+          togglePlayPause();
+        }
+        if (!isCreator() && sync) {
+          togglePlayPause();
+        }
+      });
 
-        const response = {
-          success: true,
-          message: "live video details fetched successfully",
-          data: syncVideoDetails,
-        };
-        callback(response);
-      } catch (err) {
-        const response = {
-          success: false,
-          error: err,
-          message: "error fetching live video details",
-        };
-        callback(response);
-        console.error("Error leaving room:", err.message);
-      }
-    });
+      return () => {
+        socket.off("video:changed");
+        socket.off("video:get-sync-details");
+        socket.off("video:playPause");
+      };
+    }
+  }, [socket, sync]);
 
-    socket.on("video:playPause", async (data) => {
-      if (sync && data?.isPlaying) {
-        // change the state of the user only when the sync option is on
-        setIsPlaying(data.isPlaying);
-      }
-    });
+  useEffect(() => {
+    console.log("sync", sync);
+  }, [sync]);
+  const renderControls = () => {
+    const isDisabled = sync && !hasPermission("player");
+    return (
+      <>
+        <IconButton onClick={handlePlayPause} disabled={isDisabled}>
+          {isPlaying ? (
+            <PauseIcon style={{ color: "#1976d2" }} />
+          ) : (
+            <PlayArrowIcon style={{ color: "#1976d2" }} />
+          )}
+        </IconButton>
+        <Slider
+          style={{ color: "#1976d2" }}
+          value={volume * 100}
+          onChange={handleVolumeChange}
+          aria-labelledby="volume-slider"
+          sx={{ width: 100 }}
+        />
+        <VolumeUpIcon style={{ color: "#1976d2" }} />
+        <IconButton onClick={toggleFullscreen} disabled={isDisabled}>
+          <FullscreenIcon style={{ color: "#1976d2" }} />
+        </IconButton>
+        <Slider
+          value={playbackRate * 100}
+          min={50}
+          max={200}
+          step={10}
+          onChange={handlePlaybackRateChange}
+          aria-labelledby="playback-rate-slider"
+          sx={{ width: 100 }}
+          disabled={isDisabled}
+        />
+        <SpeedIcon style={{ color: "#1976d2" }} />
+      </>
+    );
+  };
 
-    return () => {
-      socket.off("video:get-sync-details");
-      socket.off("video:playPause");
-    };
-  }, [socket]);
-
-  return (
+  return video && video?.videoURL ? (
     <Box sx={{ position: "relative" }}>
       <ReactPlayer
         ref={playerRef}
@@ -175,37 +288,16 @@ function VideoPlayer({ video }) {
           gap: 1,
         }}
       >
-        <IconButton onClick={handlePlayPause}>
-          {isPlaying ? (
-            <PauseIcon style={{ color: "#1976d2" }} />
-          ) : (
-            <PlayArrowIcon style={{ color: "#1976d2" }} />
-          )}
-        </IconButton>
-        <Slider
-          style={{ color: "#1976d2" }}
-          value={volume}
-          onChange={handleVolumeChange}
-          aria-labelledby="volume-slider"
-          sx={{ width: 100 }}
-        />
-        <VolumeUpIcon style={{ color: "#1976d2" }} />
-        <IconButton onClick={toggleFullscreen}>
-          <FullscreenIcon style={{ color: "#1976d2" }} />
-        </IconButton>
-        <Slider
-          value={playbackRate}
-          min={0.5}
-          max={2.0}
-          step={0.1}
-          onChange={handlePlaybackRateChange}
-          aria-labelledby="playback-rate-slider"
-          sx={{ width: 100 }}
-        />
-        <SpeedIcon style={{ color: "#1976d2" }} />
+        {renderControls()}
       </Box>
+      <button onClick={handleCancelVideoPlayer}>Cancel</button>
+      {!isCreator() && (
+        <button onClick={handleSync}>
+          {sync ? "Sync is on" : "Sync is off"}
+        </button>
+      )}
     </Box>
-  );
-}
+  ) : null;
+};
 
 export default VideoPlayer;

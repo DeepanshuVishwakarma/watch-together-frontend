@@ -10,6 +10,12 @@ import {
   VideoAddToPlayListButton,
   VideoRemoveFromPlayListButton,
 } from "./VideoButtons";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  setRoomVideoPlayerData,
+  setVideoPlayerData,
+} from "../../store/reducers/appData";
+import { useLocation } from "react-router-dom";
 
 function VideoCard({ video }) {
   const {
@@ -22,14 +28,30 @@ function VideoCard({ video }) {
     likes,
     ratings,
   } = video;
-  console.log("inside vid card component", video);
+  // console.log("inside vid card component", video);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [currentRating, setCurrentRating] = useState(0);
   const playerRef = useRef(null);
+  const location = useLocation();
+  const videoPlayerData = useSelector((state) => state.appData.videoPlayerData);
+  const roomVideoPlayerData = useSelector(
+    (state) => state.appData.roomVideoPlayerData
+  );
+  const dispatch = useDispatch();
 
-  const handlePlayPause = () => {
-    setIsPlaying(!isPlaying);
+  const isRoomPage = () => {
+    return location.pathname.includes("room");
+  };
+
+  const handlePlay = () => {
+    if (isRoomPage()) {
+      roomVideoPlayerData &&
+      roomVideoPlayerData?._id.toString() === video._id.toString()
+        ? alert("video is already being played")
+        : dispatch(setRoomVideoPlayerData(video));
+    }
+    dispatch(setVideoPlayerData(video));
   };
 
   const handleLike = () => {
@@ -54,28 +76,19 @@ function VideoCard({ video }) {
     <div className="video-card">
       <h3>{name}</h3>
       <p>{videoDescription}</p>
-      <div className="video-player-wrapper">
-        <ReactPlayer
+
+      {/* <ReactPlayer
           ref={playerRef}
           url={videoURL}
           playing={isPlaying}
-          controls={false} // Disable default controls to use custom ones
+          controls={false} // disable default controls to use custom ones
           width="100%"
           height="100%"
-        />
-        <div className="custom-controls">
-          <VideoPlayButton onClick={handlePlayPause} isPlaying={isPlaying}>
-            Play the video{" "}
-          </VideoPlayButton>
-          {/* <VideoLikeButton onClick={handleLike} isLiked={isLiked} ></VideoLikeButton>
-          <VideoRatingButton
-            onRate={handleRating}
-            currentRating={currentRating}
-          ></VideoRatingButton>
-          <VideoAddToPlayListButton onClick={handleAddToPlaylist} ></VideoAddToPlayListButton>
-          <VideoRemoveFromPlayListButton onClick={handleRemoveFromPlaylist} ></VideoRemoveFromPlayListButton> */}
-        </div>
-      </div>
+        /> */}
+
+      <VideoPlayButton onClick={handlePlay} isPlaying={isPlaying}>
+        Play the video
+      </VideoPlayButton>
     </div>
   );
 }

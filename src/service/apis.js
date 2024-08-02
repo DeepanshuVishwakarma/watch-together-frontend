@@ -28,3 +28,10 @@ export const videoEndPoints = {
   DELETE_ALL_VIDEOS_URL: BASE_URL + "/app/video/deleteAll",
   UPDATE_VIDEO_BY_ID_URL: BASE_URL + "/app/video/update", // append video ID manually when calling
 };
+
+export const userEndpoints = {
+  GET_USER_BY_ID_URL: BASE_URL + "/app/user", // id param
+  SEARCH_USER_BY_NAME_URL: BASE_URL + "/app/user/search", // name param
+  UPDATE_USER_URL: BASE_URL + "/app/user/update",
+  DELETE_USER_URL: BASE_URL + "/app/user/delete",
+};

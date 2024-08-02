@@ -1,0 +1,108 @@
+const { userToSocket, socketToUser } = require("../index");
+const Room = require('../models/Room'); // Ensure you have the correct path for Room model
+
+module.exports = async (socket) => {
+  // Send Friend Request
+  socket.on("sendFriendReq", async (newFriendId, callback) => {
+    try {
+      if (!newFriendId) throw new Error("New friend's id must be specified");
+
+      const newFriend = await Room.findById(newFriendId);
+      if (!newFriend) throw new Error("User you are trying to send request to is not found in DB");
+
+      const user = socket.user;
+      if (user.friends.includes(newFriendId)) throw new Error("User you are trying to send request to is already in your friend list");
+
+      newFriend.requestFrom.push(user._id);
+      await newFriend.save();
+
+      const newFriendSocket = io.sockets.sockets.get(userToSocket.get(newFriendId));
+      const data = { _id: user._id, firstName: user.firstName, lastName: user.lastName };
+
+      if (newFriendSocket) {
+        newFriendSocket.emit("friend-request", data);
+      }
+
+      const response = {
+        success: true,
+        message: "Request sent successfully",
+        data: { _id: newFriendId, firstName: newFriend.firstName, lastName: newFriend.lastName }
+      };
+      callback(response);
+    } catch (error) {
+      callback({ success: false, message: error.message });
+    }
+  });
+
+  // Unsend Friend Request
+  socket.on("unsentFriendReq", async (friendId, callback) => {
+    try {
+      if (!friendId) throw new Error("Friend's id must be specified");
+
+      const friend = await Room.findById(friendId);
+      if (!friend) throw new Error("User you are trying to unsend request to is not found in DB");
+
+      const user = socket.user;
+      const requestIndex = friend.requestFrom.indexOf(user._id);
+      if (requestIndex === -1) throw new Error("Friend request not found");
+
+      friend.requestFrom.splice(requestIndex, 1);
+      await friend.save();
+
+      const friendSocket = io.sockets.sockets.get(userToSocket.get(friendId));
+      if (friendSocket) {
+        friendSocket.emit("friend-request-unsent", { _id: user._id });
+      }
+
+      const response = {
+        success: true,
+        message: "Request unsent successfully",
+        data: { _id: friendId, firstName: friend.firstName, lastName: friend.lastName }
+      };
+      callback(response);
+    } catch (error) {
+      callback({ success: false, message: error.message });
+    }
+  });
+
+  // Accept Friend Request
+  socket.on("acceptFriendReq", async (friendId, callback) => {
+    try {
+      if (!friendId) throw new Error("Friend's id must be specified");
+
+      const friend = await Room.findById(friendId);
+      if (!friend) throw new Error("User you are trying to accept request from is not found in DB");
+
+      const user = socket.user;
+      const requestIndex = user.requestFrom.indexOf(friendId);
+      if (requestIndex === -1) throw new Error("Friend request not found");
+
+      user.requestFrom.splice(requestIndex, 1);
+      user.friends.push(friendId);
+      await user.save();
+
+      friend.friends.push(user._id);
+      await friend.save();
+
+      const friendSocket = io.sockets.sockets.get(userToSocket.get(friendId));
+      if (friendSocket) {
+        friendSocket.emit("friend-request-accepted", { _id: user._id, firstName: user.firstName, lastName: user.lastName });
+      }
+
+      const response = {
+        success: true,
+        message: "Request accepted successfully",
+        data: { _id: friendId, firstName: friend.firstName, lastName: friend.lastName }
+      };
+      callback(response);
+    } catch (error) {
+      callback({ success: false, message: error.message });
+    }
+  });
+
+  // Delete Friend Request
+  socket.on("deleteFriendReq", async (friendId, callback) => {
+    try {
+      if (!friendId) throw new Error("Friend's id must be specified");
+
+     

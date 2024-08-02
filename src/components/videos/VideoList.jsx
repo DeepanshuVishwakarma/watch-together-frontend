@@ -37,7 +37,7 @@ export default function VideoList() {
       },
     });
   }, []);
-  useEffect(() => { 
+  useEffect(() => {
     console.log("callinjg api to get all videos");
     if (dataAllVideos?.success) {
       console.log("all-videos", dataAllVideos.data);
@@ -52,7 +52,7 @@ export default function VideoList() {
     <div>
       {videos?.length &&
         videos.map((vid) => {
-          return <VideoCard video={vid} />;
+          return <VideoCard key={vid._id} video={vid} />;
         })}
     </div>
   );

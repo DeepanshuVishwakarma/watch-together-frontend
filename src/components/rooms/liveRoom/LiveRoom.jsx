@@ -16,6 +16,7 @@ export default function LiveRoom() {
 
   const { socket, socketError } = useSocket();
 
+  const user = useSelector((state) => state.User.user);
   const rooms = useSelector((state) => state.appData.rooms) || [];
   const videos = useSelector((state) => state.appData.videos) || [];
   const video = videos[0];
@@ -78,6 +79,10 @@ export default function LiveRoom() {
     setMsg(e.target.value);
   };
 
+  // const isRoomPage = () => location.pathname.includes("room");
+  const isCreator = () =>
+    rooms.find((room) => room._id === roomId)?.createdBy === user._id;
+
   return (
     <div>
       <div className="chat-component">
@@ -108,8 +113,7 @@ export default function LiveRoom() {
             <VideoPlayer></VideoPlayer>
       </div> */}
 
-      {video?.videoURL && <VideoPlayer video={video} />}
-      <VideoList></VideoList>
+      {isCreator() && <VideoList />}
     </div>
   );
 }

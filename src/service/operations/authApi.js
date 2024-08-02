@@ -32,7 +32,7 @@ export function login(email, password, navigate) {
       if (!response.data.success) {
         throw new Error(response.data.message);
       }
-      // console.log("data ", response.data);
+      console.log("data ", response.data);
       // console.log("login, SUCCESSFUL");
 
       dispatch(setToken(response.data.token));
@@ -42,7 +42,7 @@ export function login(email, password, navigate) {
       navigate("/");
     } catch (error) {
       dispatch(setError(true));
-      // console.error("LOGIN API ERROR............", error);
+      console.error("LOGIN API ERROR............", error);
     }
     dispatch(setIsUserLoading(false));
   };
