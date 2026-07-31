@@ -15,7 +15,7 @@ export function login(email, password, navigate) {
   return async (dispatch) => {
     dispatch(setIsUserLoading(true));
     try {
-      // console.log("login: loading...");
+      console.log("login: loading...");
       if (!LOGIN_API) {
         throw new Error("Login API/url is not available");
       }
@@ -27,13 +27,13 @@ export function login(email, password, navigate) {
         },
       });
 
-      // console.log("LOGIN API RESPONSE............", response);
+      console.log("LOGIN API RESPONSE............", response);
 
       if (!response.data.success) {
         throw new Error(response.data.message);
       }
       console.log("data ", response.data);
-      // console.log("login, SUCCESSFUL");
+      console.log("login, SUCCESSFUL");
 
       dispatch(setToken(response.data.token));
       dispatch(setUser(response.data.user));

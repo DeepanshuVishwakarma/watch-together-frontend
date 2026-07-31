@@ -8,7 +8,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { getLocalStorage } from "../functions/localStorage";
 import SideBar from "../components/sidebar/SideBar";
 import VideoPlayer from "../components/videos/VideoPlayer";
-const socket = io("http://localhost:5173"); // URL of your server
+const socket = io("http://127.0.0.1:5173"); // URL of your server
 
 const Home = () => {
   // const key = "users";
@@ -30,9 +30,13 @@ const Home = () => {
   const location = useLocation();
   const isRoomPage = () => location.pathname.includes("room");
   const isVideoPage = () => location.pathname.includes("videos");
+  useEffect(() => {
+    console.log(user, user?._doc?._id);
+  }, [user]);
   return (
     <div className="home-container">
       <SideBar />
+      {/* <VideoPlayer /> */}
       {user && user._id && isRoomPage() && <VideoPlayer />}
       {user && user._id && isVideoPage() && <VideoPlayer />}
       <div className="content">

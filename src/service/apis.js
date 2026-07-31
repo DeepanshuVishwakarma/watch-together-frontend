@@ -1,5 +1,8 @@
-export const BASE_URL = "http://localhost:5173/api/v1";
-export const SOCKET_URL = "http://localhost:5173";
+// export const BASE_URL = "http://localhost:5173/api/v1";
+
+export const BASE_URL = "http://127.0.0.1:5173/api/v1";
+// http://127.0.0.1:5173/ping
+export const SOCKET_URL = "http://127.0.0.1:5173";
 export const endpoints = {
   // SENDOTP_API: BASE_URL + "/auth/sendotp",
   SIGNUP_API: BASE_URL + "/auth/signup",

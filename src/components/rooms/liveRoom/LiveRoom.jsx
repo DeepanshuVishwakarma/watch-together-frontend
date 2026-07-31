@@ -8,7 +8,7 @@ import { useSocket } from "../../../socket/SocketProvider";
 import VideoPlayer from "../../videos/VideoPlayer";
 import VideoList from "../../videos/VideoList";
 import ReactPlayer from "react-player";
-
+import PeerService from "../../../wrtc/peer";
 export default function LiveRoom() {
   const dispatch = useDispatch();
   const token = useSelector((state) => state?.authUser?.token);
@@ -19,11 +19,11 @@ export default function LiveRoom() {
   const user = useSelector((state) => state.User.user);
   const rooms = useSelector((state) => state.appData.rooms) || [];
   const videos = useSelector((state) => state.appData.videos) || [];
+  const liveRoom = useSelector((state) => state.appData.liveRoom);
+
   const video = videos[0];
   const room = rooms.find((room) => room?._id === roomId);
 
-  const liveRoom = useSelector((state) => state.appData.liveRoom); // Fixed the return issue
-  console.log("LiveRoom", liveRoom);
   const [msg, setMsg] = useState("");
 
   const {
@@ -48,12 +48,6 @@ export default function LiveRoom() {
           };
           dispatch(setLiveRoom(tempLiveRoom));
         }
-        // dispatch(
-        //   setLiveRoom((prevLiveRoom) => ({
-        //     ...prevLiveRoom,
-        //     messages: [...prevLiveRoom.messages, newMessage],
-        //   }))
-        // );
       });
       return () => {
         socket.off("room:message");
@@ -75,16 +69,98 @@ export default function LiveRoom() {
     });
   };
 
+  const [remoteStreams, setRemoteStreams] = useState([]);
+  const [myStream, setMyStream] = useState();
+
+  const startCall = async (mediaConstraints) => {
+    const stream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
+    setMyStream(stream);
+
+    stream.getTracks().forEach((track) => {
+      peerService.peer.addTrack(track, stream);
+    });
+
+    const offer = await peerService.getOffer();
+    socket.emit("user:offer", { roomId, offer }, (response) => {
+      if (response.success) {
+        console.log("Answer received", response.data);
+        console.log(peerService);
+        peerService.setLocalDescription(response.data);
+      } else {
+        console.log("Error establishing connection with WebRTC");
+      }
+    });
+  };
+
+  const [audiocall, setAudio] = useState(false);
+  const [videocall, setVideo] = useState(false);
+
+  const handleAudioCall = () => {
+    setAudio(!audiocall);
+    startCall({ video: videocall, audio: !audiocall });
+  };
+
+  const handleVideoCall = () => {
+    setVideo(!videocall);
+    startCall({ audio: audiocall, video: !videocall });
+  };
+
+  useEffect(() => {
+    peerService.peer.ontrack = (event) => {
+      setRemoteStreams((prevStreams) => [...prevStreams, event.streams[0]]);
+    };
+
+    socket.on("answer", (answer) => {
+      peerService.setRemoteDescription(answer);
+    });
+
+    socket.on("ice-candidate", (candidate) => {
+      console.log("candidate", candidate);
+      peerService.peer.addIceCandidate(
+        new RTCIceCandidate(candidate.candidate)
+      );
+    });
+
+    return () => {
+      socket.off("answer");
+      socket.off("ice-candidate");
+    };
+  }, [socket]);
+
   const handleText = (e) => {
     setMsg(e.target.value);
   };
 
   // const isRoomPage = () => location.pathname.includes("room");
-  const isCreator = () =>
-    rooms.find((room) => room._id === roomId)?.createdBy === user._id;
+  const isCreator = () => {
+    return rooms.find((room) => room._id === roomId)?.createdBy === user._id;
+  };
 
   return (
     <div>
+      <button onClick={handleAudioCall}>Start Audio Call</button>
+      <button onClick={handleVideoCall}>Start Video Call</button>
+      {myStream && (
+        <div>
+          <h2>My Stream</h2>
+          <video
+            autoPlay
+            muted
+            ref={(video) => video && (video.srcObject = myStream)}
+          />
+        </div>
+      )}
+
+      {remoteStreams.map((stream, index) => (
+        <div key={index}>
+          <h2>Remote Stream {index + 1}</h2>
+          <video
+            autoPlay
+            ref={(video) => video && (video.srcObject = stream)}
+          />
+        </div>
+      ))}
+
       <div className="chat-component">
         <div>Chat Component</div>
         <div>

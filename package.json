@@ -18,6 +18,7 @@
     "@reduxjs/toolkit": "^2.2.6",
     "axios": "^1.7.2",
     "dot-env": "^0.0.1",
+    "frontend-watch2gether": "file:",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.52.1",

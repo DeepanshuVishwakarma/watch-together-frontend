@@ -86,7 +86,10 @@ function VideoCard({ video }) {
           height="100%"
         /> */}
 
-      <VideoPlayButton onClick={handlePlay} isPlaying={isPlaying}>
+      <VideoPlayButton
+        onClick={handlePlay}
+        // isPlaying={isPlaying}
+      >
         Play the video
       </VideoPlayButton>
     </div>

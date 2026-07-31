@@ -13,7 +13,7 @@ export default function CreateRoom() {
   useEffect(() => {
     // Set up the event listener for 'room:created'
     if (createConnection) {
-      const socket = io("http://localhost:5173", {
+      const socket = io("http://127.0.0.1:5173/", {
         query: { token: token },
       });
       socket.on("room:created", (roomId) => {
